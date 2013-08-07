@@ -33,3 +33,15 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+venv
+
+# PyCharm
+# http://www.jetbrains.com/pycharm/webhelp/project.html
+.idea
+.iml
+
+*.log
+*.pot
+*.pyc
+local_settings.py
