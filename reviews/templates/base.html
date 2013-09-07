@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BugSolvent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="{{ MEDIA_URL }}images/mm_logo.png" type="image/gif" sizes="16x16">
+    <!-- Le styles -->
+    <link href="{{ MEDIA_URL }}bootstrap2/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}bootstrap2/css/docs.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}bootstrap2/css/jquery-ui.css" />
+    <script src="{{ MEDIA_URL }}bootstrap2/js/jquery-1.9.1.js"></script>
+
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+          height: 100%;
+{#        padding-bottom: 40px;#}
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 100%;
+          min-height: 100%;
+{#        border-color: #ECEDF2;#}
+{#        border-style: solid;#}
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+      .ui-autocomplete {
+          z-index: 1056;
+      }
+    </style>
+    <link href="{{ MEDIA_URL }}bootstrap2/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="../assets/ico/favicon.png">
+    <script>
+        function postSolution(){
+            var data = {'solution_title': $('#solution_title').val(), 'solution':$('#solution').val(), 'key_words':$('#key_words').val() ,'csrfmiddlewaretoken': '{{ csrf_token }}'};
+            $('#myModal').modal('hide').delay(200);
+            $.post('/post-question', data, function(response){
+                var result = jQuery.parseJSON(response);
+                if (result.success)
+                    $("#successful").slideDown(400).fadeOut(4000);
+                else
+                    $("#unsuccessful").slideDown(400).fadeOut(4000);
+            });
+            $('#solution_title').val('');
+            $('#solution').val('');
+            $('#key_words').val('');
+            return false;
+        }
+    </script>
+
+
+    <script>
+        function setCaretPosition(ctrl, pos)
+        {
+
+            if(ctrl.setSelectionRange)
+            {
+                ctrl.focus();
+                ctrl.setSelectionRange(pos,pos);
+            }
+            else if (ctrl.createTextRange) {
+                var range = ctrl.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
+    </script>
+    <script>
+          $(function() {
+            var availableTags = {% autoescape off %}{{ tags }}{% endautoescape %};
+            function split( val ) {
+              return val.split( /,\s*/ );
+            }
+            function extractLast( term ) {
+              return split( term ).pop();
+            }
+
+            $( "#key_words" )
+              // don't navigate away from the field on tab when selecting an item
+              .bind( "keydown", function( event ) {
+                if ( event.keyCode === $.ui.keyCode.TAB &&
+                    $( this ).data( "ui-autocomplete" ).menu.active ) {
+                  event.preventDefault();
+                }
+              })
+              .autocomplete({
+                minLength: 0,
+                source: function( request, response ) {
+                  // delegate back to autocomplete, but extract the last term
+                  response( $.ui.autocomplete.filter(
+                    availableTags, extractLast( request.term ) ) );
+                },
+                focus: function() {
+                  // prevent value inserted on focus
+                  return false;
+                },
+                select: function( event, ui ) {
+                  var terms = split( this.value );
+                  // remove the current input
+                  terms.pop();
+                  // add the selected item
+                  terms.push( ui.item.value );
+                  // add placeholder to get the comma-and-space at the end
+                  terms.push( "" );
+                  this.value = terms.join( ", " );
+                  return false;
+                }
+              });
+          });
+    </script>
+    <script>
+        {% block script %}
+        {% endblock script %}
+	</script>
+
+</head>
+<body>
+    <div class="container-narrow" id="results_display" style="padding-bottom: 35px">
+
+      <div class="navbar navbar-fixed-top" style="background: #ebebe5; padding: 3px 0 2px 20px ">
+        <ul class="nav nav-pills pull-right" style="padding-top: 5px">
+
+          <li class="dropdown">
+            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#" style="font-family: HelveticaNeue-Light;">{{ user_email }} <b class="caret"></b></a>
+            <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4"  style="right: 10px">
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="/logout" style="font-family: HelveticaNeue-Light;">Log-Out</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a href="/"><img src="{{ MEDIA_URL }}images/solvents_logo.png" style="padding-bottom: 12px"></a>
+        <span class="help-inline" style="padding: 8px 0px 8px 10px">
+            <div class="input-append" id="qureyForm">
+                <form class="form" method="GET" action="/search" validate autocomplete="on">
+                    <div class="input-append">
+{#						<input type="hidden" name="is_silent" value=0>#}
+                        <input class="input-search" id="query" name="search" type="text" value="{{ search_query }}" placeholder="search for a solution..." style="font-family: HelveticaNeue-Light;" autocomplete="off">
+                        <button type="submit" class="btn btn-search" style="font-family: HelveticaNeue-Light">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="help-inline" style="padding-bottom: 4px">
+                <!-- <a href="http://www.google.com/search?q={{ search_query }}" style="font-family: HelveticaNeue-Light;color: #F49133;letter-spacing: 1pt;" target="_blank">Google It!</a> -->
+            </div>
+        </span>
+      </div>
+
+        <div class="container-fluid">
+          <div class="row">
+              <div class="span9" style="padding: 20px 20px 0px 15px; border-color: #ECEDF2; background-color: #ffffff">
+				  {% block body %}
+                  {% endblock body %}
+              </div>
+              <div class="span3" style="padding: 0px 10px 0px 15px; position:fixed; right:1px; ">
+                  <div class="row">
+                      <p style="font-family: HelveticaNeue-Light; padding-top: 20px; font-size: 18px;">Top Contributors
+                          <span class="help-inline" style="padding-bottom: 10px; float: right">
+                              <button class="contibutebtn btn-contribute" data-toggle="modal" href="#myModal" type="button" style="font-family: HelveticaNeue">Contribute</button></span>
+                      </p>
+                      <hr class="top-contributors-heading">
+                  </div>
+                  {% if topContributors  %}
+                      {% for name in topContributors %}
+                          <div class="row">
+                            <p style="font-family: HelveticaNeue; padding: 5px 10px 0 0; margin: 0 0 2px;">{{ forloop.counter }}. {{ name.0|slice:":-17" }}</p>
+                            {% if not forloop.last %}
+                                <hr class="top-contributors">
+                             {% endif %}
+                          </div>
+                      {% endfor %}
+                  {% else %}
+                      <div class="row" style="text-align: center; padding: 20px">
+                          <p style="font-family: HelveticaNeue-Light; margin: 0 0 2px;">
+                              Be the first one to contribute to the website &#x2661;
+                          </p>
+                      </div>
+                  {% endif %}
+                  <div class="row" style="padding-top: 20px">
+                      <div class="alert results" id="successful" hidden>
+                            <p style="font-family: HelveticaNeue-Light; margin: 0 0 2px;">
+                                Your post has been successfully posted.
+                            </p>
+                      </div>
+                      <div class="alert results alert-error" id="unsuccessful" hidden>
+                          <p style="font-family: HelveticaNeue-Light; margin: 0 0 2px;">
+                            Your post has not been posted. <br>Try again.
+                          </p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+        <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-header" style="background-color: #F49133; border-top-left-radius: 5px; border-top-right-radius: 5px">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><img src="{{ MEDIA_URL }}images/close.png"></button>
+              <p>Submit Your Solution</p>
+            </div>
+            <form class="form-horizontal" onsubmit="return postSolution()" validation>
+                <div class="modal-body">
+                  <div class="control-group">
+                      <input type="text" class="input-xxlarge" id="solution_title" name="solution_title" style="font-family: HelveticaNeue-Light" placeholder="Brief description of the bug..." required>
+                  </div>
+                  <div class="control-group">
+                      <textarea id="solution" name="solution" placeholder="Your solution..." rows="7" style="width: 93%; font-family: HelveticaNeue-Light" required></textarea>
+                  </div>
+                  <div class="control-group">
+                      <input type="text" class="input-xxlarge" id="key_words" name="key_words" placeholder="Keywords... (comma-separated)" style="font-family: HelveticaNeue-Light">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-search" style="font-family: HelveticaNeue-Light">Submit</button>
+                </div>
+            </form>
+        </div>
+        {% block delete_modal %}
+        {% endblock %}
+        {% block edit_modal %}
+        {% endblock %}
+    </div> <!-- /results page container -->
+
+    {% block index_page %}
+    {% endblock %}
+
+    <div class="footer" style="bottom: 0px; position:fixed; width: 100%; height:30px; padding-top: 0px">
+        <p style="padding: 10px">
+            <span style="float: left">© 2013 Mutual Mobile, Inc. All rights reserved</span>
+            <span class="help-inline" style="float: right; padding-right: 15px"><a href="mailto:solvents-support@mutualmobile.com" target="_blank" style="text-align: right"> Provide Feedback</a></span>
+        </p>
+    </div>
+
+
+{#    <footer class="footer">#}
+{#      <p style="padding: 10px 0 10px 0">© 2013 Mutual Mobile, Inc. All rights reserved.</p>#}
+{#    </footer>#}
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+{#    <script src="{{ MEDIA_URL }}bootstrap2/js/jquery.min.js"></script>#}
+{#    <script src="{{ MEDIA_URL }}bootstrap2/js/jquery.js"></script>#}
+    <script src="{{ MEDIA_URL }}bootstrap2/js/jquery-ui.js"></script>
+    <script src="{{ MEDIA_URL }}bootstrap2/js/bootstrap-modal.js"></script>
+    <script src="{{ MEDIA_URL }}bootstrap2/js/bootstrap-dropdown.js"></script>
+    <script src="{{ MEDIA_URL }}bootstrap2/js/bootstrap-scrollspy.js"></script>
+    <script src="{{ MEDIA_URL }}bootstrap2/js/bootstrap-transition.js"></script>
+
+</body>
+</html>

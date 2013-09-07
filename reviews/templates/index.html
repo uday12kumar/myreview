@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="">
+
+
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ MEDIA_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <link href="{{ MEDIA_URL }}bootstrap/css/login.css" rel="stylesheet">
+
+
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
+    <script type="text/javascript">
+        var lReqSymbol = false;
+        $(function () {
+            $("#comment_id").keypress(function (event) {
+                if (event.which == 35) {
+                    if (lReqSymbol == true)
+                        lReqSymbol = false;
+                    else
+                        lReqSymbol = true;
+                }
+                if (lReqSymbol == true) {
+{#                    var myData = { "par": $("#comment_id").val() };#}
+{#                    $.ajax({#}
+{#                        url: "/getdata",#}
+{#                        type: "get",#}
+{#                        dataType: "json",#}
+{#                        data: myData,#}
+{#                        success: function (response_data) {#}
+{#                            alert("success with " + response_data.data);#}
+{#                            var avail = ['udau','dajdlasj','asja'];#}
+{#                            $("#comment_id1").autocomplete({#}
+{#                                source: avail#}
+{#                            });#}
+
+
+
+                     var cache = {};
+                    $( "#comment_id1" ).autocomplete({
+                      minLength: 1,
+
+                      source: function( request, response ) {
+                        var term = request.term;
+                        if ( term in cache ) {
+                          response( cache[ term ] );
+                          return;
+                        }
+
+                        $.getJSON( "/getdata", request, function( data, status, xhr ) {
+                          cache[ term ] = data.data;
+                            alert(data.data);
+                          response( data.data );
+                        });
+                      }
+                    });
+
+                        };
+                    });
+                });
+    </script>
+  </head>
+
+
+
+
+
+
+
+  <body>
+

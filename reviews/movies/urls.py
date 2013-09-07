@@ -4,9 +4,10 @@ from django.conf.urls import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'reviews.views.home', name='home'),
+
+urlpatterns = patterns('movies.views',
+    url(r'^test$', 'test', name='test'),
+    url(r'^getdata$', 'getdata', name='getdata'),
     # url(r'^reviews/', include('reviews.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
